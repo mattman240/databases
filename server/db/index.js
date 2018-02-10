@@ -10,12 +10,5 @@ var chat = mysql.createConnection({
   database: 'chat'
 });
 
-chat.connect((err, cb) => {
-  if (err) {
-    console.log('err', err);
-  } else {
-    console.log('sucess');
-  }
-});
-
+chat.connect();
 module.exports = chat;

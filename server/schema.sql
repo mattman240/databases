@@ -7,8 +7,9 @@ USE chat;
 CREATE TABLE messages (
   /* Describe your table here.*/
   id int auto_increment,
-  messages varchar(300),
-  userID int(3) REFERENCES users(id),
+  message varchar(300),
+  roomname varchar(40),
+  username varchar(50) REFERENCES users(id),
   PRIMARY KEY (id)
 );
 
@@ -28,8 +29,9 @@ CREATE TABLE users (
 /*  Execute this file from the command line by typing:
  *    mysql -u root < server/schema.sql
  *  to create the database and the tables.*/
-  insert into users (id, username) values
-    (0,'weHateSql69');
+ --  insert into users (id, username) values
+ --    (0,'weHateSql69');
     
- insert into messages (id, messages, userID) values 
-    (0, 'trololololololololol', 0)
+ -- insert into messages (id, messages, userID) values 
+ --    (0, 'trololololololololol', 0)
+ --    
