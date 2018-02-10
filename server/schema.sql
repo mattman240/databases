@@ -28,4 +28,8 @@ CREATE TABLE users (
 /*  Execute this file from the command line by typing:
  *    mysql -u root < server/schema.sql
  *  to create the database and the tables.*/
-
+  insert into users (id, username) values
+    (0,'weHateSql69');
+    
+ insert into messages (id, messages, userID) values 
+    (0, 'trololololololololol', 0)
