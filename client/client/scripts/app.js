@@ -3,7 +3,7 @@ var app = {
 
   //TODO: The current 'handleUsernameClick' function just toggles the class 'friend'
   //to all messages sent by the user
-  server: 'localhost:3000',
+  server: '/classes/messages',
   username: 'anonymous',
   roomname: 'lobby',
   lastMessageId: 0,
@@ -26,8 +26,7 @@ var app = {
     app.$roomSelect.on('change', app.handleRoomChange);
 
     // Fetch previous messages
-    app.startSpinner();
-    app.fetch(false);
+    app.fetch();
 
     // Poll for new messages
     setInterval(function() {
@@ -36,12 +35,11 @@ var app = {
   },
 
   send: function(message) {
-    app.startSpinner();
-
     // POST the message to the server
     $.ajax({
       url: app.server,
       type: 'POST',
+      contentType: 'application/json',
       data: message,
       success: function (data) {
         // Clear messages input
@@ -56,33 +54,34 @@ var app = {
     });
   },
 
-  fetch: function(animate) {
+  fetch: function() {
     $.ajax({
       url: app.server,
       type: 'GET',
-      data: { order: '-createdAt' },
       contentType: 'application/json',
       success: function(data) {
+        console.log('success', data);
         // Don't bother if we have nothing to work with
-        if (!data.results || !data.results.length) { return; }
+        if (!data || !data.length) { return; }
 
         // Store messages for caching later
-        app.messages = data.results;
+        app.messages = data;
+   
 
         // Get the last message
-        var mostRecentMessage = data.results[data.results.length - 1];
+        var mostRecentMessage = data[data.length - 1];
 
         // Only bother updating the DOM if we have a new message
-        if (mostRecentMessage.objectId !== app.lastMessageId) {
-          // Update the UI with the fetched rooms
-          app.renderRoomList(data.results);
+        // if (mostRecentMessage.objectId !== app.lastMessageId) {
+        // Update the UI with the fetched rooms
+        app.renderRoomList(data);
 
-          // Update the UI with the fetched messages
-          app.renderMessages(data.results, animate);
+        // Update the UI with the fetched messages
+        app.renderMessages(data);
 
-          // Store the ID of the most recent message
-          app.lastMessageId = mostRecentMessage.objectId;
-        }
+        // Store the ID of the most recent message
+        // app.lastMessageId = mostRecentMessage.objectId;
+        // }
       },
       error: function(error) {
         console.error('chatterbox: Failed to fetch messages', error);
@@ -94,10 +93,9 @@ var app = {
     app.$chats.html('');
   },
 
-  renderMessages: function(messages, animate) {
+  renderMessages: function(messages) {
     // Clear existing messages`
     app.clearMessages();
-    app.stopSpinner();
     if (Array.isArray(messages)) {
       // Add all fetched messages that are in our current room
       messages
@@ -109,9 +107,6 @@ var app = {
     }
 
     // Make it scroll to the top
-    if (animate) {
-      $('body').animate({scrollTop: '0px'}, 'fast');
-    }
   },
 
   renderRoomList: function(messages) {
@@ -162,7 +157,7 @@ var app = {
     }
 
     var $message = $('<br><span/>');
-    $message.text(message.text).appendTo($chat);
+    $message.text(message.message).appendTo($chat);
 
     // Add the message to the UI
     app.$chats.append($chat);
@@ -203,7 +198,6 @@ var app = {
         app.$roomSelect.val(roomname);
       }
     } else {
-      app.startSpinner();
       // Store as undefined for empty names
       app.roomname = app.$roomSelect.val();
     }
@@ -214,23 +208,13 @@ var app = {
   handleSubmit: function(event) {
     var message = {
       username: app.username,
-      text: app.$message.val(),
+      message: app.$message.val(),
       roomname: app.roomname || 'lobby'
     };
 
-    app.send(message);
+    app.send(JSON.stringify(message));
 
     // Stop the form from submitting
     event.preventDefault();
   },
-
-  startSpinner: function() {
-    $('.spinner img').show();
-    $('form input[type=submit]').attr('disabled', 'true');
-  },
-
-  stopSpinner: function() {
-    $('.spinner img').fadeOut('fast');
-    $('form input[type=submit]').attr('disabled', null);
-  }
 };
